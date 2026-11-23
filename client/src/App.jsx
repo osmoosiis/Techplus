@@ -20,6 +20,8 @@ const AllUsers      = lazy(() => import('./pages/AllUsers'));
 const ClubDetail    = lazy(() => import('./pages/ClubDetail'));
 const NotFound      = lazy(() => import('./pages/NotFound'));
 const NewsDetail    = lazy(() => import('./pages/NewsDetail'));
+const JobBoard = lazy(()=>import('./pages/JobBoard'));
+
 
 import Layout from './components/Layout';
 import Toast from './components/Toast';
@@ -105,6 +107,7 @@ function AppContent() {
                         <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
                         <Route path="/admin/users" element={<AdminRoute><AllUsers /></AdminRoute>} />
                         <Route path="/clubs/:slug" element={<Layout><ClubDetail /></Layout>} />
+                        <Route path="/jobs" element={<JobBoard />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Suspense>

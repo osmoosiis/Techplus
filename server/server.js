@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import jobRoute from "./routes/jobRoute.js"
 import helmet from "helmet"
 import dotenv from "dotenv"
 import compression from "compression"
@@ -101,6 +102,7 @@ app.use("/api/auth", authLimiter, authRoute)
 app.use("/api/user", apiLimiter, userRoute)
 app.use("/api/news", newsLimiter, newsRoute)
 app.use("/api/hackathons", apiLimiter, hackathonRoute)
+app.use("/api/jobs", apiLimiter, jobRoute)
 app.use("/api/playlists", apiLimiter, playlistRoute)
 app.use("/api/roadmaps", apiLimiter, roadmapRoute)
 app.use("/api/clubs", apiLimiter, clubRoute)
@@ -232,7 +234,24 @@ const initializeServer = async () => {
     setImmediate(() => {
       ensureClubsSeeded().catch(() => {})
     })
-
+    //Roadmaps
+    setImmediate(() => {
+      ensureRoadmapsSeeded()
+        .then((r) => console.log("Roadmaps seeded:", r.count))
+        .catch((e) => console.error("Roadmap seed failed:", e.message))
+    })
+    //Resources
+    setImmediate(() => {
+  ensurePlaylistsSeeded()
+    .then(() => console.log("Playlists seeded"))
+    .catch((e) => console.error("Playlist seed failed:", e.message))
+})
+//news data
+setImmediate(() => {
+  fetchAndCacheNews()
+    .then((r) => console.log("News cached:", r.total))
+    .catch((e) => console.error("News fetch failed:", e.message))
+})
     // Defer non-critical warmup tasks so cold Render instances can answer auth first.
     if (process.env.ENABLE_STARTUP_WARMUPS === "true") {
       setTimeout(() => {

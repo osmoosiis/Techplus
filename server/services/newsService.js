@@ -95,6 +95,11 @@ const FEED_CACHE_TTL_MS = 10 * 60 * 1000;
 const sourceFeedCache = new Map();
 
 const rssParser = new Parser({
+  headers: {
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+    Accept: "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8"
+  },
   customFields: {
     item: [
       ["media:content", "mediaContent"],
@@ -639,6 +644,7 @@ export const fetchHackerNews = async () => {
     setCachedFeed(cacheKey, articles);
     return articles;
   } catch {
+    console.error("HN failed:", e.message);
     return getStaleFeed(cacheKey);
   }
 };
@@ -683,7 +689,8 @@ export const fetchTechCrunchRSS = async () => {
 
     setCachedFeed(cacheKey, articles);
     return articles;
-  } catch {
+    } catch (e) {
+    console.error("TechCrunch failed:", e.message);
     return getStaleFeed(cacheKey);
   }
 };
@@ -830,13 +837,16 @@ export const getNewsById = async (id) => {
 };
 
 export const mergeNewsFeeds = async (limit = 80) => {
-  const [gNews, apiNews, techCrunch] = await Promise.all([
+  const [gNews, apiNews, techCrunch, hackerNews] = await Promise.all([
     fetchGTechNews("technology"),
     fetchNewsAPI("technology"),
-    fetchTechCrunchRSS()
+    fetchTechCrunchRSS(),
+    fetchHackerNews()
   ]);
 
-  return dedupeByUrl([...gNews, ...apiNews, ...techCrunch])
+  console.log("News sources → GNews:", gNews.length, "NewsAPI:", apiNews.length, "TechCrunch:", techCrunch.length, "HN:", hackerNews.length);
+
+  return dedupeByUrl([...gNews, ...apiNews, ...techCrunch, ...hackerNews])
     .filter((a) => a.title && a.url && a.publishedAt)
     .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
     .slice(0, limit);

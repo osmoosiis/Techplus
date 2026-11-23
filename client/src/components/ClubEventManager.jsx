@@ -14,7 +14,7 @@ function FormField({ label, children, required }) {
     );
 }
 
-/* ─── Status options ──────────────────────────────────────────────────────── */
+
 const STATUS_OPTIONS = ['Upcoming', 'Ongoing', 'Completed'];
 
 const EMPTY_FORM = {
@@ -68,7 +68,7 @@ function buildEventSchedule(eventDate, timeStart, timeEnd) {
     return { date, time };
 }
 
-/* ─── Main Component ──────────────────────────────────────────────────────── */
+
 export default function ClubEventManager() {
     const { addToast } = useToast();
 
@@ -172,6 +172,11 @@ export default function ClubEventManager() {
         try {
             setSubmitting(true);
             const { date, time } = buildEventSchedule(form.eventDate, form.timeStart, form.timeEnd);
+            
+            // Find selected club name for labeling
+            const matchedClub = clubs.find(c => c._id === form.clubId);
+            const clubName = matchedClub?.name || '';
+
             const payload = {
                 clubId: form.clubId,
                 title: form.title,
@@ -182,6 +187,13 @@ export default function ClubEventManager() {
                 time,
                 registrationUrl: form.registrationUrl,
                 status: form.status,
+                // Flags added so event surfaces in Hackathons view
+                isCollegeFeatured: true,
+                isCollegeEvent: true,
+                scope: 'GNDEC',
+                type: 'Club Event',
+                clubName: clubName,
+                organizer: clubName
             };
 
             if (editingId) {
@@ -191,6 +203,10 @@ export default function ClubEventManager() {
                 await clubAPI.createEvent(payload);
                 addToast('Event created successfully', 'success');
             }
+            
+            // Dispatch dynamic window event to notify subscribers (e.g. Hackathons component)
+            window.dispatchEvent(new CustomEvent('hackathons-changed'));
+            
             cancelForm();
             fetchEvents();
         } catch (err) {
@@ -206,6 +222,10 @@ export default function ClubEventManager() {
             await clubAPI.deleteEvent(id);
             addToast('Event deleted', 'success');
             setDeletingId(null);
+            
+            // Dispatch dynamic window event on deletion
+            window.dispatchEvent(new CustomEvent('hackathons-changed'));
+            
             fetchEvents();
         } catch {
             addToast('Failed to delete event', 'error');
