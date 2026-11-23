@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/((?!send-email).*)",
-      "destination": "https://techplus-xzqw.onrender.com/api/$1"
+      "destination": "https://techplus-jtd9.onrender.com/api/$1"
     },
     {
       "source": "/((?!api/).*)",
